@@ -242,3 +242,123 @@ void loadBooksFromCSV(const std::string& filename, std::vector<Book>& books) {
         }
     }
 }
+
+int main() {
+    std::vector<Book> books;
+    std::vector<Member> members;
+    std::string filename;
+    
+    std::cout << "Enter csv file name";
+    std::cin >> filename;
+
+    // Load the books from the CSV
+    loadBooksFromCSV(filename, books);
+
+    // Create a Librarian (for simplicity, we're hardcoding the librarian details here)
+    Librarian librarian(1, "Jane Doe", "123 Library Lane", "jane.doe@library.com", 50000.0f);
+
+    int choice;
+    bool quit = false;
+
+    while (!quit) {
+        std::cout << "\n---- Library Management System ----\n";
+        std::cout << "1. Add Member\n";
+        std::cout << "2. Issue Book\n";
+        std::cout << "3. Return Book\n";
+        std::cout << "4. Display Books Borrowed by a Member\n";
+        std::cout << "5. Quit\n";
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                // Add Member
+                std::string name, address, email;
+                int id;
+                std::cout << "Enter Member ID: ";
+                std::cin >> id;
+                std::cin.ignore();  // To consume the newline character
+                std::cout << "Enter Name: ";
+                std::getline(std::cin, name);
+                std::cout << "Enter Address: ";
+                std::getline(std::cin, address);
+                std::cout << "Enter Email: ";
+                std::getline(std::cin, email);
+                librarian.addMember(members, id, name, address, email);
+                std::cout << "Member added successfully.\n";
+                // After adding the member, display the new member's details
+                Member& newMember = members.back();
+                std::cout << "New Member Details:\n"
+                          << "ID: " << newMember.getMemberID() << "\n"
+                          << "Name: " << newMember.getName() << "\n"
+                          << "Address: " << newMember.getAddress() << "\n"
+                          << "Email: " << newMember.getEmail() << "\n";
+                break;
+            }
+            case 2: {
+                // Issue Book
+                int bookID, memberID;
+                std::cout << "Enter Book ID: ";
+                std::cin >> bookID;
+                std::cout << "Enter Member ID: ";
+                std::cin >> memberID;
+                Member* member = nullptr;
+                for (auto& m : members) {
+                    if (m.getMemberID() == memberID) {
+                        member = &m;
+                        break;
+                    }
+                }
+                if (member) {
+                    librarian.issueBook(books, member, bookID);
+                    //std::cout << "Book issued successfully.\n";
+                } else {
+                    std::cout << "Member not found.\n";
+                }
+                break;
+            }
+            case 3: {
+                   int bookID, memberID;
+    std::cout << "Enter Book ID: ";
+    std::cin >> bookID;
+    std::cout << "Enter Member ID: ";
+    std::cin >> memberID;
+    Member* member = nullptr;
+    for (auto& m : members) {
+        if (m.getMemberID() == memberID) {
+            member = &m;
+            break;
+        }
+    }
+    if (member) {
+        librarian.returnBook(books, member, bookID);
+    } else {
+        std::cout << "Member not found.\n";
+    }
+    break;
+            }            
+case 4: {
+    // Display Books Borrowed by a Member
+    int memberID;
+    std::cout << "Enter Member ID: ";
+    std::cin >> memberID;
+    // Find the member in the list
+    auto it = std::find_if(members.begin(), members.end(), 
+                           [memberID](const Member& m) { return m.getMemberID() == memberID; });
+    if (it != members.end()) {
+        librarian.displayBorrowedBooks(*it);
+    } else {
+        std::cout << "Member not found.\n";
+    }
+    break;
+}
+            case 5:
+                quit = true;
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
