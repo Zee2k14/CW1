@@ -1,6 +1,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
+#include <ctime>
 
 // Base class Person
 class Person {
@@ -119,11 +125,48 @@ public:
     }
 
 void issueBook(std::vector<Book>& books, Member* member, int bookID) {
-   
+    for (auto& book : books) {
+        if (book.getBookID() == bookID && book.getBorrower() == nullptr) {
+            std::tm issueDate = {}; // Initialize to zero
+            std::cout << "Enter issue date for the book (YYYY MM DD): ";
+            std::cin >> std::get_time(&issueDate, "%Y %m %d");
+            mktime(&issueDate); // Normalize the tm structure
+
+            // Set due date to 3 days from issue date
+            std::tm dueDate = issueDate;
+            dueDate.tm_mday += 3; // Add 3 days for the due date
+            mktime(&dueDate); // Normalize the due date
+            
+            book.borrowBook(member, dueDate);
+            std::cout << "Book issued successfully. Due date: ";
+            char dueDateStr[11];
+            std::strftime(dueDateStr, sizeof(dueDateStr), "%Y-%m-%d", &dueDate);
+            std::cout << dueDateStr << std::endl;
+            break;
+        }
+    }
 }
 
 void returnBook(std::vector<Book>& books, Member* member, int bookID) {
-    
+    for (auto& book : books) {
+        if (book.getBookID() == bookID && book.getBorrower() == member) {
+            std::tm returnDate = {}; // Initialize to zero
+            std::cout << "Enter return date for the book (YYYY MM DD): ";
+            std::cin >> std::get_time(&returnDate, "%Y %m %d");
+            mktime(&returnDate); // Normalize the tm structure
+
+            // Now calculate fine based on the return date and the due date
+            float fine = calcFine(book, returnDate);
+            book.returnBook();
+            if (fine > 0) {
+               std::cout << "Book returned. Fine due: Pounds " << fine << std::endl;
+
+            } else {
+                std::cout << "Book returned. No fine due." << std::endl;
+            }
+            break;
+        }
+    }
 }
 
 float calcFine(const Book& book, const std::tm& returnDate) const {
