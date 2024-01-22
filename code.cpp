@@ -193,3 +193,52 @@ float calcFine(const Book& book, const std::tm& returnDate) const {
     void setStaffID(int newID) { staffID = newID; }
     void setSalary(float newSalary) { salary = newSalary; }
 };
+
+// Utility function to trim whitespace from start and end of a string
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(' ');
+    if (std::string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
+// Function to read books from CSV and populate the vector
+void loadBooksFromCSV(const std::string& filename, std::vector<Book>& books) {
+    std::ifstream file(filename);
+    std::string line;
+    // Skip the header line
+    std::getline(file, line);
+
+    while (std::getline(file, line)) {
+        std::istringstream s(line);
+        std::string field;
+        std::vector<std::string> row;
+
+        while (s.good()) {
+            // Check for start of quoted field
+            if (s.peek() == '\"') {
+                std::getline(s, field, '\"'); // Skip initial quote
+                std::getline(s, field, '\"'); // Read quoted value
+            } else {
+                std::getline(s, field, ',');
+            }
+            row.push_back(trim(field));
+            // Skip comma after quoted field, if present
+            if (s.peek() == ',') {
+                s.ignore();
+            }
+        }
+
+        if (row.size() >= 6) {
+            try {
+                int id = std::stoi(row[0]);
+                books.emplace_back(id, row[1], std::stoi(row[2]), row[3], row[4], row[5]);
+            } catch (const std::invalid_argument& e) {
+                std::cerr << "Invalid data found in CSV: " << line << std::endl;
+                continue;
+            }
+        }
+    }
+}
