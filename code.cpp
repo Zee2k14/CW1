@@ -84,3 +84,69 @@ public:
     int getPageCount() const { return pageCount; }
     std::string getBookType() const { return bookType; }
 };
+
+// Librarian class derived from Person
+class Librarian : public Person {
+private:
+    int staffID;
+    float salary;
+
+public:
+    Librarian(int id, const std::string& name, const std::string& address, const std::string& email, float salary)
+        : Person(name, address, email), staffID(id), salary(salary) {}
+    void displayBorrowedBooks(const Member& member) const {
+    const auto& booksLoaned = member.getBooksBorrowed();
+    if (booksLoaned.empty()) {
+        std::cout << "No books borrowed by member ID " << member.getMemberID() << "." << std::endl;
+    } else {
+        std::cout << "Books borrowed by member ID " << member.getMemberID() << ":" << std::endl;
+        for (const auto* book : booksLoaned) {
+            std::cout << "Book ID: " << book->getBookID()
+                      << ", Title: " << book->getBookName()
+                      << ", Author: " << book->getAuthorFirstName() << " " << book->getAuthorLastName()
+                      << ", Due Date: ";
+            // Convert due date to string and print
+            char dueDateStr[11];
+            std::tm dueDate = book->getDueDate(); // Store the due date in a non-temporary variable
+            std::strftime(dueDateStr, sizeof(dueDateStr), "%Y-%m-%d", &dueDate);
+            std::cout << dueDateStr << std::endl;
+        }
+    }
+}
+
+    void addMember(std::vector<Member>& members, int id, const std::string& name, const std::string& address, const std::string& email) {
+        members.emplace_back(id, name, address, email);
+    }
+
+void issueBook(std::vector<Book>& books, Member* member, int bookID) {
+   
+}
+
+void returnBook(std::vector<Book>& books, Member* member, int bookID) {
+    
+}
+
+float calcFine(const Book& book, const std::tm& returnDate) const {
+    std::tm dueDate = book.getDueDate();
+
+    // Convert both dates to time_t for comparison
+    std::time_t due = std::mktime(const_cast<std::tm*>(&dueDate));
+    std::time_t returned = std::mktime(const_cast<std::tm*>(&returnDate));
+
+    // Calculate difference in seconds
+    double seconds = std::difftime(returned, due);
+    int daysOverdue = static_cast<int>(seconds / (60 * 60 * 24));
+
+    if (daysOverdue > 0) {
+        return static_cast<float>(daysOverdue); // £1 per day
+    }
+    return 0.0f;
+}
+
+
+    int getStaffID() const { return staffID; }
+    float getSalary() const { return salary; }
+
+    void setStaffID(int newID) { staffID = newID; }
+    void setSalary(float newSalary) { salary = newSalary; }
+};
